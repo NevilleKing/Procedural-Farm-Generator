@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+// Inspector Script to allow editing of values
 public class MapGenerator : MonoBehaviour {
 
     public int mapWidth;
@@ -18,6 +19,7 @@ public class MapGenerator : MonoBehaviour {
 
     public bool autoUpdate;
 
+    // When button is pressed, generate the map
     public void GenerateMap()
     {
         float[,] noiseMap = Noise.GenerateNoiseMap(mapWidth, mapHeight, seed, noiseScale, octaves, persistance, lacunarity, offset);
@@ -26,6 +28,7 @@ public class MapGenerator : MonoBehaviour {
         display.DrawNoiseMap(noiseMap);
     }
 
+    // make sure that values don't go out of range
     private void OnValidate()
     {
         if (mapWidth < 1)
