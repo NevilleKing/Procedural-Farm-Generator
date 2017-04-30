@@ -27,5 +27,4 @@ public class NewBehaviourScript : Editor {
             mapGen.GenerateMap();
         }
     }
-
 }

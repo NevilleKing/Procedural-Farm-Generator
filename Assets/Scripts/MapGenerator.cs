@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEditor;
 
 // Inspector Script to allow editing of values
 public class MapGenerator : MonoBehaviour {
@@ -78,6 +79,12 @@ public class MapGenerator : MonoBehaviour {
             lacunarity = 1;
         if (octaves < 0)
             octaves = 0;
+    }
+
+    private void Start()
+    {
+        // generate the map on play
+        GenerateMap();
     }
 }
 
