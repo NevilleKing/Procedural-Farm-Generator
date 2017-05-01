@@ -89,7 +89,7 @@ public class MapGenerator : MonoBehaviour {
                         }
                         else if (i == 2)
                         {
-                            //if (prng.Next(0, 10) > 0)
+                            //if (prng.Next(0, 10) > 3)
                             //{
                                 treePositions.Add(y * mapChunkSize + x);
                             //}
@@ -122,8 +122,21 @@ public class MapGenerator : MonoBehaviour {
                 Vector3 pos = md.vertices[treePositions[i]];
                 pos.x *= 10;
                 pos.z *= 10;
-                GameObject tree = Instantiate(Models.treeModels[0], pos, Quaternion.Euler(new Vector3(270, 0, 0)));
-                tree.transform.SetParent(modelParent.transform);
+
+                // number to spawn
+                int numToSpawn = prng.Next(1, 4);
+                for (int treeNum = 0; treeNum < numToSpawn; ++treeNum)
+                {
+                    Vector3 currentTreePos = pos;
+                    currentTreePos.x += (prng.Next(0, 10));
+                    currentTreePos.z += (prng.Next(0, 10));
+
+                    // random rotation
+                    int rot = prng.Next(0, 360);
+
+                    GameObject tree = Instantiate(Models.treeModels[0], currentTreePos, Quaternion.Euler(new Vector3(270, rot, 0)));
+                    tree.transform.SetParent(modelParent.transform);
+                }
             }
         }
     }
