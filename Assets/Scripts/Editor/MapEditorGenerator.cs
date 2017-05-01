@@ -26,5 +26,11 @@ public class NewBehaviourScript : Editor {
         {
             mapGen.GenerateMap();
         }
+
+        // delete model button
+        if (GUILayout.Button("Delete Models"))
+        {
+            mapGen.deleteModels();
+        }
     }
 }

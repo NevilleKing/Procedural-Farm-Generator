@@ -38,9 +38,14 @@ public class MapGenerator : MonoBehaviour {
     public TerrainType[] regions;
     public SpawningInfo Models;
 
+    // parent of model objects
+    private GameObject modelParent;
+
     // When button is pressed, generate the map
     public void GenerateMap()
     {
+        deleteModels();
+
         float[,] noiseMap = Noise.GenerateNoiseMap(mapChunkSize, mapChunkSize, seed, noiseScale, octaves, persistance, lacunarity, offset);
 
         Color[] colourMap = new Color[mapChunkSize * mapChunkSize];
@@ -109,7 +114,8 @@ public class MapGenerator : MonoBehaviour {
             MeshData md = MeshGenerator.GenerateTerrainMesh(noiseMap, meshHeightMultiplier, meshHeightCurve, levelOfDetail);
             display.DrawMesh(md, TextureGenerator.TextureFromColourMap(colourMap, mapChunkSize, mapChunkSize));
 
-            GameObject p = new GameObject();
+            modelParent = new GameObject();
+            modelParent.name = "Models";
 
             for (int i = 0; i < treePositions.Count; ++i)
             {
@@ -117,8 +123,17 @@ public class MapGenerator : MonoBehaviour {
                 pos.x *= 10;
                 pos.z *= 10;
                 GameObject tree = Instantiate(Models.treeModels[0], pos, Quaternion.Euler(new Vector3(270, 0, 0)));
-                tree.transform.SetParent(p.transform);
+                tree.transform.SetParent(modelParent.transform);
             }
+        }
+    }
+
+    public void deleteModels()
+    {
+        if (modelParent != null)
+        {
+            DestroyImmediate(modelParent);
+            modelParent = null;
         }
     }
 
