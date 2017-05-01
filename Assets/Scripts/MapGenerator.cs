@@ -36,6 +36,7 @@ public class MapGenerator : MonoBehaviour {
     public bool showBorder;
 
     public TerrainType[] regions;
+    public SpawningInfo Models;
 
     // When button is pressed, generate the map
     public void GenerateMap()
@@ -45,6 +46,9 @@ public class MapGenerator : MonoBehaviour {
         Color[] colourMap = new Color[mapChunkSize * mapChunkSize];
 
         float heightCheck = regions[0].height;
+
+        System.Random prng = new System.Random(seed);
+        List<int> treePositions = new List<int>();
 
         // loop through the noise map
         for (int y = 0; y < mapChunkSize; ++y)
@@ -78,6 +82,13 @@ public class MapGenerator : MonoBehaviour {
                             if (y > 0 && noiseMap[x, y - 1] > heightCheck)
                                 colour = Color.black;
                         }
+                        else if (i == 2)
+                        {
+                            //if (prng.Next(0, 10) > 0)
+                            //{
+                                treePositions.Add(y * mapChunkSize + x);
+                            //}
+                        }
 
                         colourMap[y * mapChunkSize + x] = colour;
 
@@ -94,7 +105,21 @@ public class MapGenerator : MonoBehaviour {
         else if (drawMode == DrawMode.ColourMap)
             display.DrawTexture(TextureGenerator.TextureFromColourMap(colourMap, mapChunkSize, mapChunkSize));
         else if (drawMode == DrawMode.Mesh)
-            display.DrawMesh(MeshGenerator.GenerateTerrainMesh(noiseMap, meshHeightMultiplier, meshHeightCurve, levelOfDetail), TextureGenerator.TextureFromColourMap(colourMap, mapChunkSize, mapChunkSize));
+        {
+            MeshData md = MeshGenerator.GenerateTerrainMesh(noiseMap, meshHeightMultiplier, meshHeightCurve, levelOfDetail);
+            display.DrawMesh(md, TextureGenerator.TextureFromColourMap(colourMap, mapChunkSize, mapChunkSize));
+
+            GameObject p = new GameObject();
+
+            for (int i = 0; i < treePositions.Count; ++i)
+            {
+                Vector3 pos = md.vertices[treePositions[i]];
+                pos.x *= 10;
+                pos.z *= 10;
+                GameObject tree = Instantiate(Models.treeModels[0], pos, Quaternion.Euler(new Vector3(270, 0, 0)));
+                tree.transform.SetParent(p.transform);
+            }
+        }
     }
 
     // make sure that values don't go out of range
@@ -120,4 +145,11 @@ public struct TerrainType
     public string name;
     public float height;
     public Color colour;
+}
+
+// Holds spawning information
+[System.Serializable]
+public struct SpawningInfo
+{
+    public GameObject[] treeModels;
 }
