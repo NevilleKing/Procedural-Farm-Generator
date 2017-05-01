@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEditor;
+using System;
 
 // Inspector Script to allow editing of values
 public class MapGenerator : MonoBehaviour {
@@ -32,6 +33,7 @@ public class MapGenerator : MonoBehaviour {
     public AnimationCurve meshHeightCurve;
 
     public bool autoUpdate;
+    public bool showBorder;
 
     public TerrainType[] regions;
 
@@ -41,6 +43,8 @@ public class MapGenerator : MonoBehaviour {
         float[,] noiseMap = Noise.GenerateNoiseMap(mapChunkSize, mapChunkSize, seed, noiseScale, octaves, persistance, lacunarity, offset);
 
         Color[] colourMap = new Color[mapChunkSize * mapChunkSize];
+
+        float heightCheck = regions[0].height;
 
         // loop through the noise map
         for (int y = 0; y < mapChunkSize; ++y)
@@ -61,6 +65,43 @@ public class MapGenerator : MonoBehaviour {
                 }
             }
         }
+
+        for (int i = 0; i < colourMap.Length; ++i)
+        {
+            try
+            {
+                if ((i % mapChunkSize) != 0 && noiseMap[i * mapChunkSize - 1, i % mapChunkSize] <= heightCheck)
+                    colourMap[i * mapChunkSize + (i % mapChunkSize) - 1] = Color.black;
+            } catch (Exception e)
+            {
+                Debug.Log("test");
+            }
+        }
+
+        //for (int y2 = 0; y2 < mapChunkSize; ++y2)
+        //{
+        //    for (int x2 = 0; x2 < mapChunkSize; ++x2)
+        //    {
+        //        for (int i2 = 0; i2 < regions.Length; ++i2)
+        //        {
+        //            if (i2 == 1 && showBorder)
+        //            {
+        //                // check left
+        //                if (x2 > 0 && noiseMap[x2 - 1, y2] <= heightCheck)
+        //                    colourMap[y2 * mapChunkSize + x2 - 1] = Color.black;
+        //                //// check right
+        //                //if (x2 < mapChunkSize - 1 && noiseMap[x2 + 1, y2] <= heightCheck)
+        //                //    colourMap[y2 * mapChunkSize + x2 + 1] = Color.black;
+        //                //// check top
+        //                //if (y2 > 0 && noiseMap[x2, y2 - 1] <= heightCheck)
+        //                //    colourMap[(y2 - 1) * mapChunkSize + x2] = Color.black;
+        //                //// check bottom
+        //                //if (y2 < mapChunkSize - 1 && noiseMap[x2, y2 + 1] <= heightCheck)
+        //                //    colourMap[(y2 + 1) * mapChunkSize + x2] = Color.black;
+        //            }
+        //        }
+        //    }
+        //}
 
         MapDisplay display = FindObjectOfType<MapDisplay>();
 
