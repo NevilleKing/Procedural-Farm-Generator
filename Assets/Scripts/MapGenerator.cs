@@ -58,50 +58,34 @@ public class MapGenerator : MonoBehaviour {
                 {
                     if (currentHeight <= regions[i].height)
                     {
-                        colourMap[y * mapChunkSize + x] = regions[i].colour;
+                        Color colour = regions[i].colour;
+
+                        if (i == 1 && showBorder)
+                        {
+                            // check left
+                            if (x > 0 && noiseMap[x - 1, y] <= heightCheck)
+                                colourMap[y * mapChunkSize + x - 1] = Color.black;
+                            // check top
+                            if (y > 0 && noiseMap[x, y - 1] <= heightCheck)
+                                colourMap[(y-1) * mapChunkSize + x] = Color.black;
+                        }
+                        else if (i == 0 && showBorder)
+                        {
+                            // check left
+                            if (x > 0 && noiseMap[x - 1, y] > heightCheck)
+                                colour = Color.black;
+                            // check top
+                            if (y > 0 && noiseMap[x, y - 1] > heightCheck)
+                                colour = Color.black;
+                        }
+
+                        colourMap[y * mapChunkSize + x] = colour;
 
                         break;
                     }
                 }
             }
         }
-
-        for (int i = 0; i < colourMap.Length; ++i)
-        {
-            try
-            {
-                if ((i % mapChunkSize) != 0 && noiseMap[i * mapChunkSize - 1, i % mapChunkSize] <= heightCheck)
-                    colourMap[i * mapChunkSize + (i % mapChunkSize) - 1] = Color.black;
-            } catch (Exception e)
-            {
-                Debug.Log("test");
-            }
-        }
-
-        //for (int y2 = 0; y2 < mapChunkSize; ++y2)
-        //{
-        //    for (int x2 = 0; x2 < mapChunkSize; ++x2)
-        //    {
-        //        for (int i2 = 0; i2 < regions.Length; ++i2)
-        //        {
-        //            if (i2 == 1 && showBorder)
-        //            {
-        //                // check left
-        //                if (x2 > 0 && noiseMap[x2 - 1, y2] <= heightCheck)
-        //                    colourMap[y2 * mapChunkSize + x2 - 1] = Color.black;
-        //                //// check right
-        //                //if (x2 < mapChunkSize - 1 && noiseMap[x2 + 1, y2] <= heightCheck)
-        //                //    colourMap[y2 * mapChunkSize + x2 + 1] = Color.black;
-        //                //// check top
-        //                //if (y2 > 0 && noiseMap[x2, y2 - 1] <= heightCheck)
-        //                //    colourMap[(y2 - 1) * mapChunkSize + x2] = Color.black;
-        //                //// check bottom
-        //                //if (y2 < mapChunkSize - 1 && noiseMap[x2, y2 + 1] <= heightCheck)
-        //                //    colourMap[(y2 + 1) * mapChunkSize + x2] = Color.black;
-        //            }
-        //        }
-        //    }
-        //}
 
         MapDisplay display = FindObjectOfType<MapDisplay>();
 
