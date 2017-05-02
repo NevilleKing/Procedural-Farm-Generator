@@ -34,6 +34,7 @@ public class MapGenerator : MonoBehaviour {
 
     public bool autoUpdate;
     public bool showBorder;
+    public bool placeModels;
 
     public TerrainType[] regions;
     public SpawningInfo Models;
@@ -87,12 +88,9 @@ public class MapGenerator : MonoBehaviour {
                             if (y > 0 && noiseMap[x, y - 1] > heightCheck)
                                 colour = Color.black;
                         }
-                        else if (i == 2)
+                        else if (i == 3 && placeModels)
                         {
-                            //if (prng.Next(0, 10) > 3)
-                            //{
                                 treePositions.Add(y * mapChunkSize + x);
-                            //}
                         }
 
                         colourMap[y * mapChunkSize + x] = colour;
@@ -128,8 +126,8 @@ public class MapGenerator : MonoBehaviour {
                 for (int treeNum = 0; treeNum < numToSpawn; ++treeNum)
                 {
                     Vector3 currentTreePos = pos;
-                    currentTreePos.x += (prng.Next(0, 10));
-                    currentTreePos.z += (prng.Next(0, 10));
+                    currentTreePos.x += (prng.Next(-5, 5));
+                    currentTreePos.z += (prng.Next(-5, 5));
 
                     // random rotation
                     int rot = prng.Next(0, 360);
