@@ -35,6 +35,7 @@ public class MapGenerator : MonoBehaviour {
     public bool autoUpdate;
     public bool showBorder;
     public bool placeModels;
+    public bool placeFields;
 
     public TerrainType[] regions;
     public SpawningInfo Models;
@@ -54,6 +55,8 @@ public class MapGenerator : MonoBehaviour {
 
         Color[] colourMap = new Color[mapChunkSize * mapChunkSize];
 
+        bool[] fieldSquareDone = new bool[mapChunkSize * mapChunkSize];
+
         float heightCheck = regions[0].height;
 
         System.Random prng = new System.Random(seed);
@@ -72,6 +75,8 @@ public class MapGenerator : MonoBehaviour {
                     if (currentHeight <= regions[i].height)
                     {
                         Color colour = regions[i].colour;
+
+                        if (i != 0) fieldSquareDone[y * mapChunkSize + x] = true;
 
                         if (i == 1 && showBorder)
                         {
@@ -97,8 +102,50 @@ public class MapGenerator : MonoBehaviour {
                         }
 
                         colourMap[y * mapChunkSize + x] = colour;
-
+                        
                         break;
+                    }
+                }
+            }
+        }
+
+        // loop through array again to add fields
+        if (placeFields)
+        {
+            for (int y = 0; y < mapChunkSize; ++y)
+            {
+                for (int x = 0; x < mapChunkSize; ++x)
+                {
+                    if (!fieldSquareDone[y * mapChunkSize + x])
+                    {
+                        int fieldHeight = 10;
+                        int fieldWidth = 5;
+
+                        int fX = x;
+                        int fY = y * mapChunkSize;
+
+                        int fh = fY + fieldHeight;
+                        int fw = fX + fieldWidth;
+
+                        // pick random colour
+                        Color c = fieldColours[prng.Next(0, fieldColours.Length)];
+
+                        while (fY < fh && fY < mapChunkSize)
+                        {
+                            fX = x;
+                            while (fX < fw && fX < mapChunkSize)
+                            {
+                                if (!fieldSquareDone[fY * mapChunkSize + fX])
+                                {
+                                    fieldSquareDone[fY * mapChunkSize + fX] = true;
+                                    colourMap[fY * mapChunkSize + fX] = c;
+                                }
+
+                                ++fX;
+                            }
+
+                            ++fY;
+                        }
                     }
                 }
             }
