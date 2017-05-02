@@ -39,6 +39,9 @@ public class MapGenerator : MonoBehaviour {
     public TerrainType[] regions;
     public SpawningInfo Models;
 
+    // colours for fields
+    public Color[] fieldColours;
+
     // parent of model objects
     private GameObject modelParent;
 
