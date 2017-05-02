@@ -106,8 +106,8 @@ public static class Noise {
         Voronoi vor = new Voronoi();
 
         LibNoise.Noise2D noise2d = new LibNoise.Noise2D(mapWidth, vor);
-
-        noise2d.GeneratePlanar(0.0f, 1.0f, 0.0f, 1.0f);
+        
+        noise2d.GeneratePlanar(0.0f, 10.0f, 0.0f, 10.0f);
 
         float[,] noise = noise2d.GetData();
 
