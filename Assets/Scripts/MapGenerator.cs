@@ -109,6 +109,8 @@ public class MapGenerator : MonoBehaviour {
             }
         }
 
+        int t = 0;
+
         // loop through array again to add fields
         if (placeFields)
         {
@@ -116,6 +118,7 @@ public class MapGenerator : MonoBehaviour {
             {
                 for (int x = 0; x < mapChunkSize; ++x)
                 {
+                    ++t;
                     if (!fieldSquareDone[y * mapChunkSize + x])
                     {
                         int fieldHeight = 10;
@@ -124,32 +127,34 @@ public class MapGenerator : MonoBehaviour {
                         int fX = x;
                         int fY = y * mapChunkSize;
 
-                        int fh = fY + fieldHeight;
+                        int fh = fY + (fieldHeight * mapChunkSize);
                         int fw = fX + fieldWidth;
 
                         // pick random colour
                         Color c = fieldColours[prng.Next(0, fieldColours.Length)];
 
-                        while (fY < fh && fY < mapChunkSize)
+                        while (fY < fh && fY < fieldSquareDone.Length)
                         {
                             fX = x;
                             while (fX < fw && fX < mapChunkSize)
                             {
-                                if (!fieldSquareDone[fY * mapChunkSize + fX])
+                                if (!fieldSquareDone[fY + fX])
                                 {
-                                    fieldSquareDone[fY * mapChunkSize + fX] = true;
-                                    colourMap[fY * mapChunkSize + fX] = c;
+                                    fieldSquareDone[fY + fX] = true;
+                                    colourMap[fY + fX] = c;
                                 }
 
                                 ++fX;
                             }
 
-                            ++fY;
+                            fY += mapChunkSize;
                         }
                     }
                 }
             }
         }
+
+        Debug.Log(t);
 
         MapDisplay display = FindObjectOfType<MapDisplay>();
 
