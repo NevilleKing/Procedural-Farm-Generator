@@ -113,40 +113,60 @@ public class MapGenerator : MonoBehaviour
         // loop through array again to add fields
         if (placeFields)
         {
-            int fieldHeight = prng.Next(10, 30);
-            int fieldWidth = prng.Next(5, 25);
+            float[,] fieldNoise = Noise.GenerateFieldMap(mapChunkSize, mapChunkSize);
 
-            for (int y = 0; y < mapChunkSize; y += fieldHeight)
+            float noiseInterval = 1.0f / (float)fieldColours.Length;
+
+            //int fieldHeight = prng.Next(10, 30);
+            //int fieldWidth = prng.Next(5, 25);
+
+            for (int y = 0; y < mapChunkSize; ++y)
             {
-                for (int x = 0; x < mapChunkSize; x += fieldWidth)
+                for (int x = 0; x < mapChunkSize; ++x)
                 {
-                    fieldWidth = prng.Next(5, 25);
-
-                    int fX = x;
-                    int fY = y * mapChunkSize;
-
-                    int fh = fY + (fieldHeight * mapChunkSize);
-                    int fw = fX + fieldWidth;
-
-                    // pick random colour
-                    Color c = fieldColours[prng.Next(0, fieldColours.Length)];
-
-                    while (fY < fh && fY < fieldSquareDone.Length)
+                    if (!fieldSquareDone[y * mapChunkSize + x])
                     {
-                        fX = x;
-                        while (fX < fw && fX < mapChunkSize)
+                        fieldSquareDone[y * mapChunkSize + x] = true;
+                        float currentNoiseValue = fieldNoise[x, y];
+
+                        int index = 0;
+                        for (float j = noiseInterval; j <= 1; j += noiseInterval, ++index)
                         {
-                            if (!fieldSquareDone[fY + fX])
+                            if (currentNoiseValue <= j)
                             {
-                                fieldSquareDone[fY + fX] = true;
-                                colourMap[fY + fX] = c;
+                                colourMap[y * mapChunkSize + x] = fieldColours[index];
+                                break;
                             }
-
-                            ++fX;
                         }
-
-                        fY += mapChunkSize;
                     }
+
+                    //fieldWidth = prng.Next(5, 25);
+
+                    //int fX = x;
+                    //int fY = y * mapChunkSize;
+
+                    //int fh = fY + (fieldHeight * mapChunkSize);
+                    //int fw = fX + fieldWidth;
+
+                    //// pick random colour
+                    //Color c = fieldColours[prng.Next(0, fieldColours.Length)];
+
+                    //while (fY < fh && fY < fieldSquareDone.Length)
+                    //{
+                    //    fX = x;
+                    //    while (fX < fw && fX < mapChunkSize)
+                    //    {
+                    //        if (!fieldSquareDone[fY + fX])
+                    //        {
+                    //            fieldSquareDone[fY + fX] = true;
+                    //            colourMap[fY + fX] = c;
+                    //        }
+
+                    //        ++fX;
+                    //    }
+
+                    //    fY += mapChunkSize;
+                    //}
                 }
             }
         }

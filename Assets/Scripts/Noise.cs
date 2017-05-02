@@ -1,5 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using LibNoise.Operator;
+using LibNoise.Generator;
 using UnityEngine;
 
 public static class Noise {
@@ -83,4 +85,41 @@ public static class Noise {
         return noiseMap;
     }
 	
+    public static float[,] GenerateFieldMap(int mapWidth, int mapHeight)
+    {
+        //Perlin perlin = new LibNoise.Generator.Perlin();
+        //Voronoi vor = new Voronoi();
+        //RidgedMultifractal rmf = new RidgedMultifractal();
+
+        //Const constGen = new Const(0.5f);
+
+        //var noiseGen = new Add(new Multiply(perlin, constGen), new Multiply(rmf, constGen));
+
+        //LibNoise.Noise2D noise2d = new LibNoise.Noise2D(size, noiseGen);
+
+        //noise2d.GeneratePlanar(0.0f, 1.0f, 0.0f, 1.0f);
+
+        //return noise2d.GetData();
+
+        int noiseSize = mapWidth * mapHeight;
+
+        Voronoi vor = new Voronoi();
+
+        LibNoise.Noise2D noise2d = new LibNoise.Noise2D(mapWidth, vor);
+
+        noise2d.GeneratePlanar(0.0f, 1.0f, 0.0f, 1.0f);
+
+        float[,] noise = noise2d.GetData();
+
+        // normalise
+        for (int y = 0; y < mapHeight; ++y)
+        {
+            for (int x = 0; x < mapWidth; ++x)
+            {
+                noise[x, y] = Mathf.InverseLerp(-1, 1, noise[x, y]);
+            }
+        }
+
+        return noise;
+    }
 }
