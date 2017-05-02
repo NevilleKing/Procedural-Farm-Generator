@@ -83,19 +83,31 @@ public class MapGenerator : MonoBehaviour
                         {
                             // check left
                             if (x > 0 && noiseMap[x - 1, y] <= heightCheck)
+                            {
                                 colourMap[y * mapChunkSize + x - 1] = Color.black;
+                                treePositions.Add(y * mapChunkSize + (x-1));
+                            }
                             // check top
                             if (y > 0 && noiseMap[x, y - 1] <= heightCheck)
+                            {
                                 colourMap[(y - 1) * mapChunkSize + x] = Color.black;
+                                treePositions.Add((y-1) * mapChunkSize + x);
+                            }
                         }
                         else if (i == 0 && showBorder)
                         {
                             // check left
                             if (x > 0 && noiseMap[x - 1, y] > heightCheck)
+                            {
                                 colour = Color.black;
+                                treePositions.Add(y * mapChunkSize + x);
+                            }
                             // check top
                             if (y > 0 && noiseMap[x, y - 1] > heightCheck)
+                            {
                                 colour = Color.black;
+                                treePositions.Add(y * mapChunkSize + x);
+                            }
                         }
                         else if (i == 3 && placeModels)
                         {
@@ -137,6 +149,20 @@ public class MapGenerator : MonoBehaviour
                                 colourMap[y * mapChunkSize + x] = fieldColours[index];
                                 break;
                             }
+                        }
+
+                        //if (lastNoise != currentNoiseValue)
+                        //    treePositions.Add(y * mapChunkSize + x);
+
+                        // check left
+                        if (x > 0 && fieldNoise[x - 1, y] != currentNoiseValue)
+                        {
+                            treePositions.Add(y * mapChunkSize + x);
+                        }
+                        // check top
+                        if (y > 0 && fieldNoise[x, y - 1] != currentNoiseValue)
+                        {
+                            treePositions.Add(y * mapChunkSize + x);
                         }
                     }
 
