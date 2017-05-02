@@ -110,16 +110,17 @@ public class MapGenerator : MonoBehaviour
             }
         }
 
-        int fieldHeight = 10;
-        int fieldWidth = 5;
-
         // loop through array again to add fields
         if (placeFields)
         {
+            int fieldHeight = prng.Next(10, 30);
+            int fieldWidth = prng.Next(5, 25);
+
             for (int y = 0; y < mapChunkSize; y += fieldHeight)
             {
                 for (int x = 0; x < mapChunkSize; x += fieldWidth)
                 {
+                    fieldWidth = prng.Next(5, 25);
 
                     int fX = x;
                     int fY = y * mapChunkSize;
