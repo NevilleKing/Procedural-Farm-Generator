@@ -5,7 +5,8 @@ using UnityEditor;
 using System;
 
 // Inspector Script to allow editing of values
-public class MapGenerator : MonoBehaviour {
+public class MapGenerator : MonoBehaviour
+{
 
     public enum DrawMode
     {
@@ -16,12 +17,12 @@ public class MapGenerator : MonoBehaviour {
     public DrawMode drawMode;
 
     const int mapChunkSize = 241; // for level of detail
-    [Range(0,6)]
+    [Range(0, 6)]
     public int levelOfDetail;
     public float noiseScale;
 
     public int octaves;
-    [Range(0,1)]
+    [Range(0, 1)]
     public float persistance;
     public float lacunarity;
 
@@ -85,7 +86,7 @@ public class MapGenerator : MonoBehaviour {
                                 colourMap[y * mapChunkSize + x - 1] = Color.black;
                             // check top
                             if (y > 0 && noiseMap[x, y - 1] <= heightCheck)
-                                colourMap[(y-1) * mapChunkSize + x] = Color.black;
+                                colourMap[(y - 1) * mapChunkSize + x] = Color.black;
                         }
                         else if (i == 0 && showBorder)
                         {
@@ -98,63 +99,56 @@ public class MapGenerator : MonoBehaviour {
                         }
                         else if (i == 3 && placeModels)
                         {
-                                treePositions.Add(y * mapChunkSize + x);
+                            treePositions.Add(y * mapChunkSize + x);
                         }
 
                         colourMap[y * mapChunkSize + x] = colour;
-                        
+
                         break;
                     }
                 }
             }
         }
 
-        int t = 0;
+        int fieldHeight = 10;
+        int fieldWidth = 5;
 
         // loop through array again to add fields
         if (placeFields)
         {
-            for (int y = 0; y < mapChunkSize; ++y)
+            for (int y = 0; y < mapChunkSize; y += fieldHeight)
             {
-                for (int x = 0; x < mapChunkSize; ++x)
+                for (int x = 0; x < mapChunkSize; x += fieldWidth)
                 {
-                    ++t;
-                    if (!fieldSquareDone[y * mapChunkSize + x])
+
+                    int fX = x;
+                    int fY = y * mapChunkSize;
+
+                    int fh = fY + (fieldHeight * mapChunkSize);
+                    int fw = fX + fieldWidth;
+
+                    // pick random colour
+                    Color c = fieldColours[prng.Next(0, fieldColours.Length)];
+
+                    while (fY < fh && fY < fieldSquareDone.Length)
                     {
-                        int fieldHeight = 10;
-                        int fieldWidth = 5;
-
-                        int fX = x;
-                        int fY = y * mapChunkSize;
-
-                        int fh = fY + (fieldHeight * mapChunkSize);
-                        int fw = fX + fieldWidth;
-
-                        // pick random colour
-                        Color c = fieldColours[prng.Next(0, fieldColours.Length)];
-
-                        while (fY < fh && fY < fieldSquareDone.Length)
+                        fX = x;
+                        while (fX < fw && fX < mapChunkSize)
                         {
-                            fX = x;
-                            while (fX < fw && fX < mapChunkSize)
+                            if (!fieldSquareDone[fY + fX])
                             {
-                                if (!fieldSquareDone[fY + fX])
-                                {
-                                    fieldSquareDone[fY + fX] = true;
-                                    colourMap[fY + fX] = c;
-                                }
-
-                                ++fX;
+                                fieldSquareDone[fY + fX] = true;
+                                colourMap[fY + fX] = c;
                             }
 
-                            fY += mapChunkSize;
+                            ++fX;
                         }
+
+                        fY += mapChunkSize;
                     }
                 }
             }
         }
-
-        Debug.Log(t);
 
         MapDisplay display = FindObjectOfType<MapDisplay>();
 
