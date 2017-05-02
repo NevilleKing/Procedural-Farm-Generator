@@ -6,10 +6,24 @@ ModelImporter:
   serializedVersion: 19
   fileIDToRecycleName:
     100000: //RootNode
+    100002: oast
+    100004: oast_001
+    100006: oast_002
     400000: //RootNode
+    400002: oast
+    400004: oast_001
+    400006: oast_002
     2300000: //RootNode
+    2300002: oast
+    2300004: oast_001
+    2300006: oast_002
     3300000: //RootNode
+    3300002: oast
+    3300004: oast_001
+    3300006: oast_002
     4300000: oast
+    4300002: oast_002
+    4300004: oast_001
     7400000: Default Take
     9500000: //RootNode
   materials:
