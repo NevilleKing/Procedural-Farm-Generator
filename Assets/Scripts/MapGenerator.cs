@@ -125,7 +125,7 @@ public class MapGenerator : MonoBehaviour
         // loop through array again to add fields
         if (placeFields)
         {
-            float[,] fieldNoise = Noise.GenerateFieldMap(mapChunkSize, mapChunkSize);
+            float[,] fieldNoise = Noise.GenerateFieldMap(mapChunkSize, mapChunkSize, seed);
 
             float noiseInterval = 1.0f / (float)fieldColours.Length;
 
@@ -153,16 +153,18 @@ public class MapGenerator : MonoBehaviour
 
                         //if (lastNoise != currentNoiseValue)
                         //    treePositions.Add(y * mapChunkSize + x);
-
-                        // check left
-                        if (x > 0 && fieldNoise[x - 1, y] != currentNoiseValue)
+                        if (placeModels)
                         {
-                            treePositions.Add(y * mapChunkSize + x);
-                        }
-                        // check top
-                        if (y > 0 && fieldNoise[x, y - 1] != currentNoiseValue)
-                        {
-                            treePositions.Add(y * mapChunkSize + x);
+                            // check left
+                            if (x > 0 && fieldNoise[x - 1, y] != currentNoiseValue)
+                            {
+                                treePositions.Add(y * mapChunkSize + x);
+                            }
+                            // check top
+                            if (y > 0 && fieldNoise[x, y - 1] != currentNoiseValue)
+                            {
+                                treePositions.Add(y * mapChunkSize + x);
+                            }
                         }
                     }
 

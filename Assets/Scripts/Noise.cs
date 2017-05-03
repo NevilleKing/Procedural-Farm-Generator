@@ -85,7 +85,7 @@ public static class Noise {
         return noiseMap;
     }
 	
-    public static float[,] GenerateFieldMap(int mapWidth, int mapHeight)
+    public static float[,] GenerateFieldMap(int mapWidth, int mapHeight, int seed)
     {
         //Perlin perlin = new LibNoise.Generator.Perlin();
         //Voronoi vor = new Voronoi();
@@ -101,13 +101,19 @@ public static class Noise {
 
         //return noise2d.GetData();
 
+        System.Random prng = new System.Random(seed);
+        float offsetX = prng.Next(-100000, 100000);
+        float offsetY = prng.Next(-100000, 100000);
+
+        float scale = 10.0f;
+
         int noiseSize = mapWidth * mapHeight;
 
         Voronoi vor = new Voronoi();
 
         LibNoise.Noise2D noise2d = new LibNoise.Noise2D(mapWidth, vor);
         
-        noise2d.GeneratePlanar(0.0f, 10.0f, 0.0f, 10.0f);
+        noise2d.GeneratePlanar(offsetX, offsetX + scale, offsetY, offsetY + scale);
 
         float[,] noise = noise2d.GetData();
 
