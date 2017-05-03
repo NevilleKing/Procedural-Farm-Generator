@@ -107,8 +107,6 @@ public static class Noise {
 
         float scale = 10.0f;
 
-        int noiseSize = mapWidth * mapHeight;
-
         Voronoi vor = new Voronoi();
 
         LibNoise.Noise2D noise2d = new LibNoise.Noise2D(mapWidth, vor);

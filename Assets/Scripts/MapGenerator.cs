@@ -61,7 +61,7 @@ public class MapGenerator : MonoBehaviour
         float heightCheck = regions[0].height;
 
         System.Random prng = new System.Random(seed);
-        List<int> treePositions = new List<int>();
+        List<ModelPlacementInfo> modelPositions = new List<ModelPlacementInfo>();
 
         // loop through the noise map
         for (int y = 0; y < mapChunkSize; ++y)
@@ -85,13 +85,13 @@ public class MapGenerator : MonoBehaviour
                             if (x > 0 && noiseMap[x - 1, y] <= heightCheck)
                             {
                                 colourMap[y * mapChunkSize + x - 1] = Color.black;
-                                treePositions.Add(y * mapChunkSize + (x-1));
+                                modelPositions.Add(new ModelPlacementInfo(ModelPlacementInfo.PlacementType.wall, y * mapChunkSize + x, ModelPlacementInfo.Rotation.left));
                             }
                             // check top
                             if (y > 0 && noiseMap[x, y - 1] <= heightCheck)
                             {
                                 colourMap[(y - 1) * mapChunkSize + x] = Color.black;
-                                treePositions.Add((y-1) * mapChunkSize + x);
+                                modelPositions.Add(new ModelPlacementInfo(ModelPlacementInfo.PlacementType.wall, y * mapChunkSize + x, ModelPlacementInfo.Rotation.top));
                             }
                         }
                         else if (i == 0 && showBorder)
@@ -100,18 +100,18 @@ public class MapGenerator : MonoBehaviour
                             if (x > 0 && noiseMap[x - 1, y] > heightCheck)
                             {
                                 colour = Color.black;
-                                treePositions.Add(y * mapChunkSize + x);
+                                modelPositions.Add(new ModelPlacementInfo(ModelPlacementInfo.PlacementType.wall, y * mapChunkSize + x, ModelPlacementInfo.Rotation.left));
                             }
                             // check top
                             if (y > 0 && noiseMap[x, y - 1] > heightCheck)
                             {
                                 colour = Color.black;
-                                treePositions.Add(y * mapChunkSize + x);
+                                modelPositions.Add(new ModelPlacementInfo(ModelPlacementInfo.PlacementType.wall, y * mapChunkSize + x, ModelPlacementInfo.Rotation.top));
                             }
                         }
                         else if (i == 3 && placeModels)
                         {
-                            treePositions.Add(y * mapChunkSize + x);
+                            modelPositions.Add(new ModelPlacementInfo(ModelPlacementInfo.PlacementType.tree, (y * mapChunkSize + x)));
                         }
 
                         colourMap[y * mapChunkSize + x] = colour;
@@ -153,17 +153,17 @@ public class MapGenerator : MonoBehaviour
 
                         //if (lastNoise != currentNoiseValue)
                         //    treePositions.Add(y * mapChunkSize + x);
-                        if (placeModels)
+                        if (placeModels && showBorder)
                         {
                             // check left
                             if (x > 0 && fieldNoise[x - 1, y] != currentNoiseValue)
                             {
-                                treePositions.Add(y * mapChunkSize + x);
+                                modelPositions.Add(new ModelPlacementInfo(ModelPlacementInfo.PlacementType.wall, y * mapChunkSize + x, ModelPlacementInfo.Rotation.left));
                             }
                             // check top
                             if (y > 0 && fieldNoise[x, y - 1] != currentNoiseValue)
                             {
-                                treePositions.Add(y * mapChunkSize + x);
+                                modelPositions.Add(new ModelPlacementInfo(ModelPlacementInfo.PlacementType.wall, y * mapChunkSize + x, ModelPlacementInfo.Rotation.top));
                             }
                         }
                     }
@@ -213,25 +213,49 @@ public class MapGenerator : MonoBehaviour
             modelParent = new GameObject();
             modelParent.name = "Models";
 
-            for (int i = 0; i < treePositions.Count; ++i)
+            for (int i = 0; i < modelPositions.Count; ++i)
             {
-                Vector3 pos = md.vertices[treePositions[i]];
+                Vector3 pos = md.vertices[modelPositions[i].meshIndex];
                 pos.x *= 10;
                 pos.z *= 10;
 
-                // number to spawn
-                int numToSpawn = prng.Next(1, 4);
-                for (int treeNum = 0; treeNum < numToSpawn; ++treeNum)
+                switch (modelPositions[i].type)
                 {
-                    Vector3 currentTreePos = pos;
-                    currentTreePos.x += (prng.Next(-5, 5));
-                    currentTreePos.z += (prng.Next(-5, 5));
 
-                    // random rotation
-                    int rot = prng.Next(0, 360);
+                    case ModelPlacementInfo.PlacementType.tree:
 
-                    GameObject tree = Instantiate(Models.treeModels[0], currentTreePos, Quaternion.Euler(new Vector3(270, rot, 0)));
-                    tree.transform.SetParent(modelParent.transform);
+                        // number to spawn
+                        int numToSpawn = prng.Next(1, 4);
+                        for (int treeNum = 0; treeNum < numToSpawn; ++treeNum)
+                        {
+                            Vector3 currentTreePos = pos;
+                            currentTreePos.x += (prng.Next(-5, 5));
+                            currentTreePos.z += (prng.Next(-5, 5));
+
+                            // random rotation
+                            int rot = prng.Next(0, 360);
+
+                            GameObject tree = Instantiate(Models.treeModels[0], currentTreePos, Quaternion.Euler(new Vector3(270, rot, 0)));
+                            tree.transform.SetParent(modelParent.transform);
+                        }
+                        break;
+
+                    case ModelPlacementInfo.PlacementType.wall:
+
+                        GameObject wall;
+
+                        if (modelPositions[i].rotation == ModelPlacementInfo.Rotation.left)
+                        {
+                            wall = Instantiate(Models.wallModels[0], pos - new Vector3(0, -1, 5), Quaternion.Euler(new Vector3(270, 90, 0)));
+                            wall.transform.SetParent(modelParent.transform);
+                        }
+                        else if (modelPositions[i].rotation == ModelPlacementInfo.Rotation.top)
+                        {
+                            wall = Instantiate(Models.wallModels[0], pos + new Vector3(Models.wallModels[0].GetComponent<MeshRenderer>().bounds.size.x / 2, 1, 0), Quaternion.Euler(new Vector3(270, 0, 0)));
+                            wall.transform.SetParent(modelParent.transform);
+                        }
+
+                        break;
                 }
             }
         }
@@ -276,4 +300,40 @@ public struct TerrainType
 public struct SpawningInfo
 {
     public GameObject[] treeModels;
+    public GameObject[] wallModels;
+}
+
+public class ModelPlacementInfo
+{
+    public enum PlacementType
+    {
+        tree,
+        wall
+    }
+
+    public enum Rotation
+    {
+        left,
+        top
+    }
+
+    public PlacementType type;
+    public int meshIndex;
+    public Rotation rotation;
+
+    public ModelPlacementInfo(PlacementType t, 
+                              int meshI)
+    {
+        type = t;
+        meshIndex = meshI;
+    }
+
+    public ModelPlacementInfo(PlacementType t,
+                             int meshI,
+                             Rotation rot)
+    {
+        type = t;
+        meshIndex = meshI;
+        rotation = rot;
+    }
 }
