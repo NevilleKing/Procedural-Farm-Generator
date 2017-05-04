@@ -171,73 +171,21 @@ public class MapGenerator : MonoBehaviour
 
                             if (result.Count > 30) { // make sure the field is big enough
 
-                                int initValue = prng.Next(0, result.Count);
+                                if (prng.Next(0, 100) > 70) { // oast
 
-                                int spawnValue = -1;
+                                    int oastVal = getBuildingLocation(ref prng, ref result, ref fieldNoise, x, y);
 
-                                float currentNoiseValue = fieldNoise[x, y];
-
-                                for (int i = initValue; i < result.Count; ++i) {
-
-                                    int xx = result[i] % mapChunkSize;
-                                    int yy = result[i] / mapChunkSize;
-
-                                    // check left
-                                    if (xx > 0 && fieldNoise[xx - 1, yy] != currentNoiseValue)
-                                        spawnValue = result[i];
-
-
-                                    // check right
-                                    if (xx < (mapChunkSize - 1) && fieldNoise[xx + 1, yy] != currentNoiseValue)
-                                        spawnValue = result[i];
-
-
-                                    // check top
-                                    if (yy > 0 && fieldNoise[xx, yy - 1] != currentNoiseValue)
-                                        spawnValue = result[i];
-
-                                    // check bottom
-                                    if (yy < (mapChunkSize - 1) && fieldNoise[xx, yy + 1] != currentNoiseValue)
-                                        spawnValue = result[i];
-
-
-                                }
-
-                                if (spawnValue == -1) {
-
-                                    for (int i = 0; i < initValue; ++i) {
-
-                                        int xx = result[i] % mapChunkSize;
-                                        int yy = result[i] / mapChunkSize;
-
-                                        // check left
-                                        if (xx > 0 && fieldNoise[xx - 1, yy] != currentNoiseValue)
-                                            spawnValue = result[i];
-
-
-                                        // check right
-                                        if (xx < (mapChunkSize - 1) && fieldNoise[xx + 1, yy] != currentNoiseValue)
-                                            spawnValue = result[i];
-
-
-                                        // check top
-                                        if (yy > 0 && fieldNoise[xx, yy - 1] != currentNoiseValue)
-                                            spawnValue = result[i];
-
-                                        // check bottom
-                                        if (yy < (mapChunkSize - 1) && fieldNoise[xx, yy + 1] != currentNoiseValue)
-                                            spawnValue = result[i];
-
+                                    if (oastVal != -1) {
+                                        modelPositions.Add(new ModelPlacementInfo(ModelPlacementInfo.PlacementType.oast, oastVal));
                                     }
 
                                 }
 
-                                if (spawnValue != -1) {
+                                int outBuildingVal = getBuildingLocation(ref prng, ref result, ref fieldNoise, x, y);
 
-                                    modelPositions.Add(new ModelPlacementInfo(ModelPlacementInfo.PlacementType.buildings, spawnValue));
-
+                                if (outBuildingVal != -1) {
+                                    modelPositions.Add(new ModelPlacementInfo(ModelPlacementInfo.PlacementType.buildings, outBuildingVal));
                                 }
-
                             }
 
                         }
@@ -323,6 +271,13 @@ public class MapGenerator : MonoBehaviour
 
                         break;
 
+                    case ModelPlacementInfo.PlacementType.oast:
+
+                        GameObject oast = Instantiate(Models.oasts[prng.Next(0, Models.oasts.Length)].building, pos + new Vector3(5, 0, -5), Quaternion.Euler(new Vector3(0, 0, 0)));
+                        oast.transform.SetParent(modelParent.transform);
+
+                        break;
+
                     case ModelPlacementInfo.PlacementType.turbine:
 
                         GameObject t = Instantiate(Models.turbine, pos + new Vector3(5, 24, -5), Quaternion.Euler(new Vector3(-90, 0, 0)));
@@ -393,6 +348,72 @@ public class MapGenerator : MonoBehaviour
             FRecurse(x, y + 1, ref result, ref fieldSquareDone, ref fieldNoise);
 
     }
+
+    private int getBuildingLocation(ref System.Random prng, ref List<int> result, ref float[,] fieldNoise, int x, int y)
+    {
+        int initValue = prng.Next(0, result.Count);
+
+        int spawnValue = -1;
+
+        float currentNoiseValue = fieldNoise[x, y];
+
+        for (int i = initValue; i < result.Count; ++i) {
+
+            int xx = result[i] % mapChunkSize;
+            int yy = result[i] / mapChunkSize;
+
+            // check left
+            if (xx > 0 && fieldNoise[xx - 1, yy] != currentNoiseValue)
+                spawnValue = result[i];
+
+
+            // check right
+            if (xx < (mapChunkSize - 1) && fieldNoise[xx + 1, yy] != currentNoiseValue)
+                spawnValue = result[i];
+
+
+            // check top
+            if (yy > 0 && fieldNoise[xx, yy - 1] != currentNoiseValue)
+                spawnValue = result[i];
+
+            // check bottom
+            if (yy < (mapChunkSize - 1) && fieldNoise[xx, yy + 1] != currentNoiseValue)
+                spawnValue = result[i];
+
+
+        }
+
+        if (spawnValue == -1) {
+
+            for (int i = 0; i < initValue; ++i) {
+
+                int xx = result[i] % mapChunkSize;
+                int yy = result[i] / mapChunkSize;
+
+                // check left
+                if (xx > 0 && fieldNoise[xx - 1, yy] != currentNoiseValue)
+                    spawnValue = result[i];
+
+
+                // check right
+                if (xx < (mapChunkSize - 1) && fieldNoise[xx + 1, yy] != currentNoiseValue)
+                    spawnValue = result[i];
+
+
+                // check top
+                if (yy > 0 && fieldNoise[xx, yy - 1] != currentNoiseValue)
+                    spawnValue = result[i];
+
+                // check bottom
+                if (yy < (mapChunkSize - 1) && fieldNoise[xx, yy + 1] != currentNoiseValue)
+                    spawnValue = result[i];
+
+            }
+
+        }
+
+        return spawnValue;
+    }
 }
 
 // Hold information on terrain types
@@ -414,6 +435,8 @@ public struct SpawningInfo
 
     public GameObject turbine;
 
+    public BuildingOptions[] oasts;
+
     public BuildingOptions[] buildings;
 }
 
@@ -425,7 +448,8 @@ public class ModelPlacementInfo
         wall,
         crops,
         buildings,
-        turbine
+        turbine,
+        oast
     }
 
     public enum Rotation
