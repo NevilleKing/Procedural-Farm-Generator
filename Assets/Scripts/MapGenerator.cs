@@ -151,8 +151,10 @@ public class MapGenerator : MonoBehaviour
                     if (!fieldSquareDone[y * mapChunkSize + x]) {
 
                         List<int> result = RecursiveField(x, y, ref fieldSquareDone, ref fieldNoise);
+                        int crop = prng.Next(0, Models.crops.Length);
+                        
                         for (int i = 0; i < result.Count; ++i)
-                            colourMap[result[i]] = Color.black;
+                            modelPositions.Add(new ModelPlacementInfo(ModelPlacementInfo.PlacementType.crops, result[i], crop));
                     }
                 }
             }
@@ -211,6 +213,12 @@ public class MapGenerator : MonoBehaviour
                             wall.transform.SetParent(modelParent.transform);
                         }
 
+                        break;
+
+                    case ModelPlacementInfo.PlacementType.crops:
+
+                        GameObject crop = Instantiate(Models.crops[modelPositions[i].gameObjectIndex], pos + new Vector3(5, 0, -5), Quaternion.identity);
+                        crop.transform.SetParent(modelParent.transform);
                         break;
                 }
             }
@@ -293,6 +301,7 @@ public struct SpawningInfo
 {
     public GameObject[] treeModels;
     public GameObject[] wallModels;
+    public GameObject[] crops;
 }
 
 public class ModelPlacementInfo
@@ -300,7 +309,8 @@ public class ModelPlacementInfo
     public enum PlacementType
     {
         tree,
-        wall
+        wall,
+        crops
     }
 
     public enum Rotation
@@ -313,11 +323,22 @@ public class ModelPlacementInfo
     public int meshIndex;
     public Rotation rotation;
 
+    public int gameObjectIndex;
+
     public ModelPlacementInfo(PlacementType t,
                               int meshI)
     {
         type = t;
         meshIndex = meshI;
+    }
+
+    public ModelPlacementInfo(PlacementType t,
+                              int meshI,
+                              int go_loc)
+    {
+        type = t;
+        meshIndex = meshI;
+        gameObjectIndex = go_loc;
     }
 
     public ModelPlacementInfo(PlacementType t,
