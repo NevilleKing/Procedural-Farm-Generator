@@ -217,7 +217,9 @@ public class MapGenerator : MonoBehaviour
 
                     case ModelPlacementInfo.PlacementType.crops:
 
-                        GameObject crop = Instantiate(Models.crops[modelPositions[i].gameObjectIndex], pos + new Vector3(5, 0, -5), Quaternion.identity);
+                        GameObject crop = Instantiate(Models.crops[modelPositions[i].gameObjectIndex].theObject, pos + new Vector3(5, 0, -5), Quaternion.identity);
+                        if (Models.crops[modelPositions[i].gameObjectIndex].randomRotation)
+                            crop.transform.rotation = Quaternion.Euler(new Vector3(0, prng.Next(0, 360), 0));
                         crop.transform.SetParent(modelParent.transform);
                         break;
                 }
@@ -301,7 +303,7 @@ public struct SpawningInfo
 {
     public GameObject[] treeModels;
     public GameObject[] wallModels;
-    public GameObject[] crops;
+    public PlaceObject[] crops;
 }
 
 public class ModelPlacementInfo
@@ -349,4 +351,11 @@ public class ModelPlacementInfo
         meshIndex = meshI;
         rotation = rot;
     }
+}
+
+[System.Serializable]
+public struct PlaceObject
+{
+    public GameObject theObject;
+    public bool randomRotation;
 }
