@@ -169,12 +169,76 @@ public class MapGenerator : MonoBehaviour
 
                         } else if (prng.Next(0, 100) > 20) { // should it spawn anything?
 
+                            if (result.Count > 30) { // make sure the field is big enough
 
-                        }
+                                int initValue = prng.Next(0, result.Count);
 
-                        if (result.Count > 30) { // make sure it is big enough
+                                int spawnValue = -1;
+
+                                float currentNoiseValue = fieldNoise[x, y];
+
+                                for (int i = initValue; i < result.Count; ++i) {
+
+                                    int xx = result[i] % mapChunkSize;
+                                    int yy = result[i] / mapChunkSize;
+
+                                    // check left
+                                    if (xx > 0 && fieldNoise[xx - 1, yy] != currentNoiseValue)
+                                        spawnValue = result[i];
 
 
+                                    // check right
+                                    if (xx < (mapChunkSize - 1) && fieldNoise[xx + 1, yy] != currentNoiseValue)
+                                        spawnValue = result[i];
+
+
+                                    // check top
+                                    if (yy > 0 && fieldNoise[xx, yy - 1] != currentNoiseValue)
+                                        spawnValue = result[i];
+
+                                    // check bottom
+                                    if (yy < (mapChunkSize - 1) && fieldNoise[xx, yy + 1] != currentNoiseValue)
+                                        spawnValue = result[i];
+
+
+                                }
+
+                                if (spawnValue == -1) {
+
+                                    for (int i = 0; i < initValue; ++i) {
+
+                                        int xx = result[i] % mapChunkSize;
+                                        int yy = result[i] / mapChunkSize;
+
+                                        // check left
+                                        if (xx > 0 && fieldNoise[xx - 1, yy] != currentNoiseValue)
+                                            spawnValue = result[i];
+
+
+                                        // check right
+                                        if (xx < (mapChunkSize - 1) && fieldNoise[xx + 1, yy] != currentNoiseValue)
+                                            spawnValue = result[i];
+
+
+                                        // check top
+                                        if (yy > 0 && fieldNoise[xx, yy - 1] != currentNoiseValue)
+                                            spawnValue = result[i];
+
+                                        // check bottom
+                                        if (yy < (mapChunkSize - 1) && fieldNoise[xx, yy + 1] != currentNoiseValue)
+                                            spawnValue = result[i];
+
+                                    }
+
+                                }
+
+                                if (spawnValue != -1) {
+
+                                    modelPositions.Add(new ModelPlacementInfo(ModelPlacementInfo.PlacementType.buildings, spawnValue));
+
+                                }
+
+                            }
 
                         }
 
@@ -254,13 +318,14 @@ public class MapGenerator : MonoBehaviour
 
                     case ModelPlacementInfo.PlacementType.buildings:
 
-
+                        GameObject o = Instantiate(Models.buildings[prng.Next(0, Models.buildings.Length)].building, pos + new Vector3(5, 0, -5), Quaternion.Euler(new Vector3(0, 0, 0)));
+                        o.transform.SetParent(modelParent.transform);
 
                         break;
 
                     case ModelPlacementInfo.PlacementType.turbine:
 
-                        GameObject t = Instantiate(Models.turbine, pos + new Vector3(5, 24, -5), Quaternion.Euler(new Vector3(-90, 0, 0))); //prng.Next(0, 360)
+                        GameObject t = Instantiate(Models.turbine, pos + new Vector3(5, 24, -5), Quaternion.Euler(new Vector3(-90, 0, 0)));
                         t.transform.SetParent(modelParent.transform);
 
                         break;
@@ -348,6 +413,8 @@ public struct SpawningInfo
     public PlaceObject[] crops;
 
     public GameObject turbine;
+
+    public BuildingOptions[] buildings;
 }
 
 public class ModelPlacementInfo
