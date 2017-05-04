@@ -177,6 +177,12 @@ public class MapGenerator : MonoBehaviour
                                     int oastVal = getBuildingLocation(ref prng, ref result, ref fieldNoise, x, y, out rot);
 
                                     if (oastVal != -1) {
+                                        for (int i = result.Count - 1; i > 0; --i) {
+                                            if (result[i] == oastVal) {
+                                                iToDel.Add(i);
+                                                break;
+                                            }
+                                        }
                                         modelPositions.Add(new ModelPlacementInfo(ModelPlacementInfo.PlacementType.oast, oastVal, rot));
                                     }
 
@@ -186,8 +192,15 @@ public class MapGenerator : MonoBehaviour
                                 int outBuildingVal = getBuildingLocation(ref prng, ref result, ref fieldNoise, x, y, out rot2);
 
                                 if (outBuildingVal != -1) {
+                                    for (int i = result.Count - 1; i > 0; --i) {
+                                        if (result[i] == outBuildingVal) {
+                                            iToDel.Add(i);
+                                            break;
+                                        }
+                                    }
                                     modelPositions.Add(new ModelPlacementInfo(ModelPlacementInfo.PlacementType.buildings, outBuildingVal, rot2));
                                 }
+
                             }
 
                         }
@@ -195,7 +208,7 @@ public class MapGenerator : MonoBehaviour
                         for (int i = iToDel.Count - 1; i >= 0; --i) {
                             result.RemoveAt(iToDel[i]);
                         }
-                        
+
                         for (int i = 0; i < result.Count; ++i)
                             modelPositions.Add(new ModelPlacementInfo(ModelPlacementInfo.PlacementType.crops, result[i], crop));
                     }
@@ -360,12 +373,12 @@ public class MapGenerator : MonoBehaviour
         float currentNoiseValue = fieldNoise[x, y];
 
         // check left
-        if (x > 0 && !fieldSquareDone[iPos-1] && fieldNoise[x - 1, y] == currentNoiseValue)
+        if (x > 0 && !fieldSquareDone[iPos - 1] && fieldNoise[x - 1, y] == currentNoiseValue)
             FRecurse(x - 1, y, ref result, ref fieldSquareDone, ref fieldNoise);
 
 
         // check right
-        if (x < (mapChunkSize-1) && !fieldSquareDone[iPos + 1] && fieldNoise[x + 1, y] == currentNoiseValue)
+        if (x < (mapChunkSize - 1) && !fieldSquareDone[iPos + 1] && fieldNoise[x + 1, y] == currentNoiseValue)
             FRecurse(x + 1, y, ref result, ref fieldSquareDone, ref fieldNoise);
 
 
