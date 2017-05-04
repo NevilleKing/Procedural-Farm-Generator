@@ -145,13 +145,42 @@ public class MapGenerator : MonoBehaviour
                 }
             }
 
-            // crop generation
+            // crop & building generation
             for (int y = 0; y < mapChunkSize; ++y) {
                 for (int x = 0; x < mapChunkSize; ++x) {
                     if (!fieldSquareDone[y * mapChunkSize + x]) {
 
                         List<int> result = RecursiveField(x, y, ref fieldSquareDone, ref fieldNoise);
                         int crop = prng.Next(0, Models.crops.Length);
+
+                        List<int> iToDel = new List<int>();
+
+                        // building stuff
+
+                        // is it a turbine field?
+                        if (prng.Next(0, 100) > 90) {
+
+                            for (int i = 0; i < result.Count; ++i) {
+                                if (i % 10 == 0) {
+                                    modelPositions.Add(new ModelPlacementInfo(ModelPlacementInfo.PlacementType.turbine, result[i]));
+                                    iToDel.Add(i);
+                                }
+                            }
+
+                        } else if (prng.Next(0, 100) > 20) { // should it spawn anything?
+
+
+                        }
+
+                        if (result.Count > 30) { // make sure it is big enough
+
+
+
+                        }
+
+                        for (int i = iToDel.Count - 1; i >= 0; --i) {
+                            result.RemoveAt(iToDel[i]);
+                        }
                         
                         for (int i = 0; i < result.Count; ++i)
                             modelPositions.Add(new ModelPlacementInfo(ModelPlacementInfo.PlacementType.crops, result[i], crop));
@@ -221,6 +250,19 @@ public class MapGenerator : MonoBehaviour
                         if (Models.crops[modelPositions[i].gameObjectIndex].randomRotation)
                             crop.transform.rotation = Quaternion.Euler(new Vector3(0, prng.Next(0, 360), 0));
                         crop.transform.SetParent(modelParent.transform);
+                        break;
+
+                    case ModelPlacementInfo.PlacementType.buildings:
+
+
+
+                        break;
+
+                    case ModelPlacementInfo.PlacementType.turbine:
+
+                        GameObject t = Instantiate(Models.turbine, pos + new Vector3(5, 24, -5), Quaternion.Euler(new Vector3(-90, 0, 0))); //prng.Next(0, 360)
+                        t.transform.SetParent(modelParent.transform);
+
                         break;
                 }
             }
@@ -304,6 +346,8 @@ public struct SpawningInfo
     public GameObject[] treeModels;
     public GameObject[] wallModels;
     public PlaceObject[] crops;
+
+    public GameObject turbine;
 }
 
 public class ModelPlacementInfo
@@ -312,7 +356,9 @@ public class ModelPlacementInfo
     {
         tree,
         wall,
-        crops
+        crops,
+        buildings,
+        turbine
     }
 
     public enum Rotation
@@ -358,4 +404,11 @@ public struct PlaceObject
 {
     public GameObject theObject;
     public bool randomRotation;
+}
+
+[System.Serializable]
+public struct BuildingOptions
+{
+    public GameObject building;
+    public Vector2 size;
 }
