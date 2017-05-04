@@ -87,20 +87,6 @@ public static class Noise {
 	
     public static float[,] GenerateFieldMap(int mapWidth, int mapHeight, int seed)
     {
-        //Perlin perlin = new LibNoise.Generator.Perlin();
-        //Voronoi vor = new Voronoi();
-        //RidgedMultifractal rmf = new RidgedMultifractal();
-
-        //Const constGen = new Const(0.5f);
-
-        //var noiseGen = new Add(new Multiply(perlin, constGen), new Multiply(rmf, constGen));
-
-        //LibNoise.Noise2D noise2d = new LibNoise.Noise2D(size, noiseGen);
-
-        //noise2d.GeneratePlanar(0.0f, 1.0f, 0.0f, 1.0f);
-
-        //return noise2d.GetData();
-
         System.Random prng = new System.Random(seed);
         float offsetX = prng.Next(-100000, 100000);
         float offsetY = prng.Next(-100000, 100000);

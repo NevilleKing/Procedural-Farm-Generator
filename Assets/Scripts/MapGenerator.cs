@@ -64,53 +64,40 @@ public class MapGenerator : MonoBehaviour
         List<ModelPlacementInfo> modelPositions = new List<ModelPlacementInfo>();
 
         // loop through the noise map
-        for (int y = 0; y < mapChunkSize; ++y)
-        {
-            for (int x = 0; x < mapChunkSize; ++x)
-            {
+        for (int y = 0; y < mapChunkSize; ++y) {
+            for (int x = 0; x < mapChunkSize; ++x) {
                 float currentHeight = noiseMap[x, y];
 
                 // see what region the current height falls within
-                for (int i = 0; i < regions.Length; ++i)
-                {
-                    if (currentHeight <= regions[i].height)
-                    {
+                for (int i = 0; i < regions.Length; ++i) {
+                    if (currentHeight <= regions[i].height) {
                         Color colour = regions[i].colour;
 
                         if (i != 0) fieldSquareDone[y * mapChunkSize + x] = true;
 
-                        if (i == 1 && showBorder)
-                        {
+                        if (i == 1 && showBorder) {
                             // check left
-                            if (x > 0 && noiseMap[x - 1, y] <= heightCheck)
-                            {
+                            if (x > 0 && noiseMap[x - 1, y] <= heightCheck) {
                                 colourMap[y * mapChunkSize + x - 1] = Color.black;
                                 modelPositions.Add(new ModelPlacementInfo(ModelPlacementInfo.PlacementType.wall, y * mapChunkSize + x, ModelPlacementInfo.Rotation.left));
                             }
                             // check top
-                            if (y > 0 && noiseMap[x, y - 1] <= heightCheck)
-                            {
+                            if (y > 0 && noiseMap[x, y - 1] <= heightCheck) {
                                 colourMap[(y - 1) * mapChunkSize + x] = Color.black;
                                 modelPositions.Add(new ModelPlacementInfo(ModelPlacementInfo.PlacementType.wall, y * mapChunkSize + x, ModelPlacementInfo.Rotation.top));
                             }
-                        }
-                        else if (i == 0 && showBorder)
-                        {
+                        } else if (i == 0 && showBorder) {
                             // check left
-                            if (x > 0 && noiseMap[x - 1, y] > heightCheck)
-                            {
+                            if (x > 0 && noiseMap[x - 1, y] > heightCheck) {
                                 colour = Color.black;
                                 modelPositions.Add(new ModelPlacementInfo(ModelPlacementInfo.PlacementType.wall, y * mapChunkSize + x, ModelPlacementInfo.Rotation.left));
                             }
                             // check top
-                            if (y > 0 && noiseMap[x, y - 1] > heightCheck)
-                            {
+                            if (y > 0 && noiseMap[x, y - 1] > heightCheck) {
                                 colour = Color.black;
                                 modelPositions.Add(new ModelPlacementInfo(ModelPlacementInfo.PlacementType.wall, y * mapChunkSize + x, ModelPlacementInfo.Rotation.top));
                             }
-                        }
-                        else if (i == 3 && placeModels)
-                        {
+                        } else if (i == 3 && placeModels) {
                             modelPositions.Add(new ModelPlacementInfo(ModelPlacementInfo.PlacementType.tree, (y * mapChunkSize + x)));
                         }
 
@@ -123,81 +110,55 @@ public class MapGenerator : MonoBehaviour
         }
 
         // loop through array again to add fields
-        if (placeFields)
-        {
+        if (placeFields) {
             float[,] fieldNoise = Noise.GenerateFieldMap(mapChunkSize, mapChunkSize, seed);
 
             float noiseInterval = 1.0f / (float)fieldColours.Length;
 
-            //int fieldHeight = prng.Next(10, 30);
-            //int fieldWidth = prng.Next(5, 25);
-
-            for (int y = 0; y < mapChunkSize; ++y)
-            {
-                for (int x = 0; x < mapChunkSize; ++x)
-                {
-                    if (!fieldSquareDone[y * mapChunkSize + x])
-                    {
-                        fieldSquareDone[y * mapChunkSize + x] = true;
+            for (int y = 0; y < mapChunkSize; ++y) {
+                for (int x = 0; x < mapChunkSize; ++x) {
+                    if (!fieldSquareDone[y * mapChunkSize + x]) {
+                        //fieldSquareDone[y * mapChunkSize + x] = true;
                         float currentNoiseValue = fieldNoise[x, y];
 
                         int index = 0;
-                        for (float j = noiseInterval; j <= 1; j += noiseInterval, ++index)
-                        {
-                            if (currentNoiseValue <= j)
-                            {
+                        for (float j = noiseInterval; j <= 1; j += noiseInterval, ++index) {
+                            if (currentNoiseValue <= j) {
                                 colourMap[y * mapChunkSize + x] = fieldColours[index];
                                 break;
                             }
                         }
 
-                        //if (lastNoise != currentNoiseValue)
-                        //    treePositions.Add(y * mapChunkSize + x);
-                        if (placeModels && showBorder)
-                        {
+                        if (placeModels && showBorder) {
                             // check left
-                            if (x > 0 && fieldNoise[x - 1, y] != currentNoiseValue)
-                            {
+                            if (x > 0 && fieldNoise[x - 1, y] != currentNoiseValue) {
                                 modelPositions.Add(new ModelPlacementInfo(ModelPlacementInfo.PlacementType.wall, y * mapChunkSize + x, ModelPlacementInfo.Rotation.left));
                             }
                             // check top
-                            if (y > 0 && fieldNoise[x, y - 1] != currentNoiseValue)
-                            {
+                            if (y > 0 && fieldNoise[x, y - 1] != currentNoiseValue) {
                                 modelPositions.Add(new ModelPlacementInfo(ModelPlacementInfo.PlacementType.wall, y * mapChunkSize + x, ModelPlacementInfo.Rotation.top));
                             }
                         }
                     }
 
-                    //fieldWidth = prng.Next(5, 25);
 
-                    //int fX = x;
-                    //int fY = y * mapChunkSize;
+                }
+            }
 
-                    //int fh = fY + (fieldHeight * mapChunkSize);
-                    //int fw = fX + fieldWidth;
+            // crop generation
+            for (int y = 0; y < mapChunkSize; ++y) {
+                for (int x = 0; x < mapChunkSize; ++x) {
+                    if (!fieldSquareDone[y * mapChunkSize + x]) {
 
-                    //// pick random colour
-                    //Color c = fieldColours[prng.Next(0, fieldColours.Length)];
-
-                    //while (fY < fh && fY < fieldSquareDone.Length)
-                    //{
-                    //    fX = x;
-                    //    while (fX < fw && fX < mapChunkSize)
-                    //    {
-                    //        if (!fieldSquareDone[fY + fX])
-                    //        {
-                    //            fieldSquareDone[fY + fX] = true;
-                    //            colourMap[fY + fX] = c;
-                    //        }
-
-                    //        ++fX;
-                    //    }
-
-                    //    fY += mapChunkSize;
-                    //}
+                        List<int> result = RecursiveField(x, y, ref fieldSquareDone, ref fieldNoise);
+                        for (int i = 0; i < result.Count; ++i)
+                            colourMap[result[i]] = Color.black;
+                    }
                 }
             }
         }
+
+
 
         MapDisplay display = FindObjectOfType<MapDisplay>();
 
@@ -205,29 +166,27 @@ public class MapGenerator : MonoBehaviour
             display.DrawTexture(TextureGenerator.TextureFromHeightMap(noiseMap));
         else if (drawMode == DrawMode.ColourMap)
             display.DrawTexture(TextureGenerator.TextureFromColourMap(colourMap, mapChunkSize, mapChunkSize));
-        else if (drawMode == DrawMode.Mesh)
-        {
+        else if (drawMode == DrawMode.Mesh) {
             MeshData md = MeshGenerator.GenerateTerrainMesh(noiseMap, meshHeightMultiplier, meshHeightCurve, levelOfDetail);
             display.DrawMesh(md, TextureGenerator.TextureFromColourMap(colourMap, mapChunkSize, mapChunkSize));
 
             modelParent = new GameObject();
             modelParent.name = "Models";
 
-            for (int i = 0; i < modelPositions.Count; ++i)
-            {
+            for (int i = 0; i < modelPositions.Count; ++i) {
                 Vector3 pos = md.vertices[modelPositions[i].meshIndex];
                 pos.x *= 10;
                 pos.z *= 10;
 
-                switch (modelPositions[i].type)
-                {
+                switch (modelPositions[i].type) {
 
                     case ModelPlacementInfo.PlacementType.tree:
 
+                        int treeModelIndex = prng.Next(0, Models.treeModels.Length);
+
                         // number to spawn
                         int numToSpawn = prng.Next(1, 4);
-                        for (int treeNum = 0; treeNum < numToSpawn; ++treeNum)
-                        {
+                        for (int treeNum = 0; treeNum < numToSpawn; ++treeNum) {
                             Vector3 currentTreePos = pos;
                             currentTreePos.x += (prng.Next(-5, 5));
                             currentTreePos.z += (prng.Next(-5, 5));
@@ -235,7 +194,7 @@ public class MapGenerator : MonoBehaviour
                             // random rotation
                             int rot = prng.Next(0, 360);
 
-                            GameObject tree = Instantiate(Models.treeModels[0], currentTreePos, Quaternion.Euler(new Vector3(270, rot, 0)));
+                            GameObject tree = Instantiate(Models.treeModels[treeModelIndex], currentTreePos, Quaternion.Euler(new Vector3(270, rot, 0)));
                             tree.transform.SetParent(modelParent.transform);
                         }
                         break;
@@ -244,13 +203,10 @@ public class MapGenerator : MonoBehaviour
 
                         GameObject wall;
 
-                        if (modelPositions[i].rotation == ModelPlacementInfo.Rotation.left)
-                        {
+                        if (modelPositions[i].rotation == ModelPlacementInfo.Rotation.left) {
                             wall = Instantiate(Models.wallModels[0], pos - new Vector3(0, -1, 5), Quaternion.Euler(new Vector3(270, 90, 0)));
                             wall.transform.SetParent(modelParent.transform);
-                        }
-                        else if (modelPositions[i].rotation == ModelPlacementInfo.Rotation.top)
-                        {
+                        } else if (modelPositions[i].rotation == ModelPlacementInfo.Rotation.top) {
                             wall = Instantiate(Models.wallModels[0], pos + new Vector3(Models.wallModels[0].GetComponent<MeshRenderer>().bounds.size.x / 2, 1, 0), Quaternion.Euler(new Vector3(270, 0, 0)));
                             wall.transform.SetParent(modelParent.transform);
                         }
@@ -263,8 +219,7 @@ public class MapGenerator : MonoBehaviour
 
     public void deleteModels()
     {
-        if (modelParent != null)
-        {
+        if (modelParent != null) {
             DestroyImmediate(modelParent);
             modelParent = null;
         }
@@ -283,6 +238,43 @@ public class MapGenerator : MonoBehaviour
     {
         // generate the map on play
         GenerateMap();
+    }
+
+    private List<int> RecursiveField(int x, int y, ref bool[] fieldSquareDone, ref float[,] fieldNoise)
+    {
+        List<int> result = new List<int>();
+
+        FRecurse(x, y, ref result, ref fieldSquareDone, ref fieldNoise);
+
+        return result;
+    }
+
+    private void FRecurse(int x, int y, ref List<int> result, ref bool[] fieldSquareDone, ref float[,] fieldNoise)
+    {
+        int iPos = y * mapChunkSize + x;
+        fieldSquareDone[iPos] = true;
+        result.Add(iPos);
+
+        float currentNoiseValue = fieldNoise[x, y];
+
+        // check left
+        if (x > 0 && !fieldSquareDone[iPos-1] && fieldNoise[x - 1, y] == currentNoiseValue)
+            FRecurse(x - 1, y, ref result, ref fieldSquareDone, ref fieldNoise);
+
+
+        // check right
+        if (x < (mapChunkSize-1) && !fieldSquareDone[iPos + 1] && fieldNoise[x + 1, y] == currentNoiseValue)
+            FRecurse(x + 1, y, ref result, ref fieldSquareDone, ref fieldNoise);
+
+
+        // check top
+        if (y > 0 && !fieldSquareDone[iPos - mapChunkSize] && fieldNoise[x, y - 1] == currentNoiseValue)
+            FRecurse(x, y - 1, ref result, ref fieldSquareDone, ref fieldNoise);
+
+        // check bottom
+        if (y < (mapChunkSize - 1) && !fieldSquareDone[iPos + mapChunkSize] && fieldNoise[x, y + 1] == currentNoiseValue)
+            FRecurse(x, y + 1, ref result, ref fieldSquareDone, ref fieldNoise);
+
     }
 }
 
@@ -321,7 +313,7 @@ public class ModelPlacementInfo
     public int meshIndex;
     public Rotation rotation;
 
-    public ModelPlacementInfo(PlacementType t, 
+    public ModelPlacementInfo(PlacementType t,
                               int meshI)
     {
         type = t;
