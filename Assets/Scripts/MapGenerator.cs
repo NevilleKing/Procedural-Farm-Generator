@@ -173,18 +173,20 @@ public class MapGenerator : MonoBehaviour
 
                                 if (prng.Next(0, 100) > 70) { // oast
 
-                                    int oastVal = getBuildingLocation(ref prng, ref result, ref fieldNoise, x, y);
+                                    ModelPlacementInfo.Rotation rot;
+                                    int oastVal = getBuildingLocation(ref prng, ref result, ref fieldNoise, x, y, out rot);
 
                                     if (oastVal != -1) {
-                                        modelPositions.Add(new ModelPlacementInfo(ModelPlacementInfo.PlacementType.oast, oastVal));
+                                        modelPositions.Add(new ModelPlacementInfo(ModelPlacementInfo.PlacementType.oast, oastVal, rot));
                                     }
 
                                 }
 
-                                int outBuildingVal = getBuildingLocation(ref prng, ref result, ref fieldNoise, x, y);
+                                ModelPlacementInfo.Rotation rot2;
+                                int outBuildingVal = getBuildingLocation(ref prng, ref result, ref fieldNoise, x, y, out rot2);
 
                                 if (outBuildingVal != -1) {
-                                    modelPositions.Add(new ModelPlacementInfo(ModelPlacementInfo.PlacementType.buildings, outBuildingVal));
+                                    modelPositions.Add(new ModelPlacementInfo(ModelPlacementInfo.PlacementType.buildings, outBuildingVal, rot2));
                                 }
                             }
 
@@ -266,14 +268,20 @@ public class MapGenerator : MonoBehaviour
 
                     case ModelPlacementInfo.PlacementType.buildings:
 
-                        GameObject o = Instantiate(Models.buildings[prng.Next(0, Models.buildings.Length)].building, pos + new Vector3(5, 0, -5), Quaternion.Euler(new Vector3(0, 0, 0)));
+                        float rotVal;
+                        Vector3 offset2 = getOffsetValue(modelPositions[i].rotation, out rotVal);
+
+                        GameObject o = Instantiate(Models.buildings[prng.Next(0, Models.buildings.Length)].building, pos + new Vector3(5, 0, -5) + offset2, Quaternion.Euler(new Vector3(0, rotVal, 0)));
                         o.transform.SetParent(modelParent.transform);
 
                         break;
 
                     case ModelPlacementInfo.PlacementType.oast:
 
-                        GameObject oast = Instantiate(Models.oasts[prng.Next(0, Models.oasts.Length)].building, pos + new Vector3(5, 0, -5), Quaternion.Euler(new Vector3(0, 0, 0)));
+                        float rotVal2;
+                        Vector3 offset = getOffsetValue(modelPositions[i].rotation, out rotVal2);
+
+                        GameObject oast = Instantiate(Models.oasts[prng.Next(0, Models.oasts.Length)].building, pos + new Vector3(5, 0, -5) + offset, Quaternion.Euler(new Vector3(0, rotVal2, 0)));
                         oast.transform.SetParent(modelParent.transform);
 
                         break;
@@ -286,6 +294,28 @@ public class MapGenerator : MonoBehaviour
                         break;
                 }
             }
+        }
+    }
+
+    private Vector3 getOffsetValue(ModelPlacementInfo.Rotation rot, out float rotationValue)
+    {
+        float offsetValue = 3;
+        switch (rot) {
+            case ModelPlacementInfo.Rotation.bottom:
+                rotationValue = 90;
+                return new Vector3(0, 0, offsetValue);
+            case ModelPlacementInfo.Rotation.top:
+                rotationValue = 0;
+                return new Vector3(0, 0, -offsetValue);
+            case ModelPlacementInfo.Rotation.left:
+                rotationValue = 180;
+                return new Vector3(offsetValue, 0, 0);
+            case ModelPlacementInfo.Rotation.right:
+                rotationValue = 0;
+                return new Vector3(-offsetValue, 0, 0);
+            default:
+                rotationValue = 0;
+                return new Vector3(0, 0, 0);
         }
     }
 
@@ -349,8 +379,10 @@ public class MapGenerator : MonoBehaviour
 
     }
 
-    private int getBuildingLocation(ref System.Random prng, ref List<int> result, ref float[,] fieldNoise, int x, int y)
+    private int getBuildingLocation(ref System.Random prng, ref List<int> result, ref float[,] fieldNoise, int x, int y, out ModelPlacementInfo.Rotation rotation)
     {
+        rotation = ModelPlacementInfo.Rotation.bottom;
+
         int initValue = prng.Next(0, result.Count);
 
         int spawnValue = -1;
@@ -363,23 +395,32 @@ public class MapGenerator : MonoBehaviour
             int yy = result[i] / mapChunkSize;
 
             // check left
-            if (xx > 0 && fieldNoise[xx - 1, yy] != currentNoiseValue)
+            if (xx > 0 && fieldNoise[xx - 1, yy] != currentNoiseValue) {
                 spawnValue = result[i];
-
+                rotation = ModelPlacementInfo.Rotation.left;
+                break;
+            }
 
             // check right
-            if (xx < (mapChunkSize - 1) && fieldNoise[xx + 1, yy] != currentNoiseValue)
+            if (xx < (mapChunkSize - 1) && fieldNoise[xx + 1, yy] != currentNoiseValue) {
                 spawnValue = result[i];
-
+                rotation = ModelPlacementInfo.Rotation.right;
+                break;
+            }
 
             // check top
-            if (yy > 0 && fieldNoise[xx, yy - 1] != currentNoiseValue)
+            if (yy > 0 && fieldNoise[xx, yy - 1] != currentNoiseValue) {
                 spawnValue = result[i];
+                rotation = ModelPlacementInfo.Rotation.top;
+                break;
+            }
 
             // check bottom
-            if (yy < (mapChunkSize - 1) && fieldNoise[xx, yy + 1] != currentNoiseValue)
+            if (yy < (mapChunkSize - 1) && fieldNoise[xx, yy + 1] != currentNoiseValue) {
                 spawnValue = result[i];
-
+                rotation = ModelPlacementInfo.Rotation.bottom;
+                break;
+            }
 
         }
 
@@ -391,22 +432,32 @@ public class MapGenerator : MonoBehaviour
                 int yy = result[i] / mapChunkSize;
 
                 // check left
-                if (xx > 0 && fieldNoise[xx - 1, yy] != currentNoiseValue)
+                if (xx > 0 && fieldNoise[xx - 1, yy] != currentNoiseValue) {
                     spawnValue = result[i];
-
+                    rotation = ModelPlacementInfo.Rotation.left;
+                    break;
+                }
 
                 // check right
-                if (xx < (mapChunkSize - 1) && fieldNoise[xx + 1, yy] != currentNoiseValue)
+                if (xx < (mapChunkSize - 1) && fieldNoise[xx + 1, yy] != currentNoiseValue) {
                     spawnValue = result[i];
-
+                    rotation = ModelPlacementInfo.Rotation.right;
+                    break;
+                }
 
                 // check top
-                if (yy > 0 && fieldNoise[xx, yy - 1] != currentNoiseValue)
+                if (yy > 0 && fieldNoise[xx, yy - 1] != currentNoiseValue) {
                     spawnValue = result[i];
+                    rotation = ModelPlacementInfo.Rotation.top;
+                    break;
+                }
 
                 // check bottom
-                if (yy < (mapChunkSize - 1) && fieldNoise[xx, yy + 1] != currentNoiseValue)
+                if (yy < (mapChunkSize - 1) && fieldNoise[xx, yy + 1] != currentNoiseValue) {
                     spawnValue = result[i];
+                    rotation = ModelPlacementInfo.Rotation.bottom;
+                    break;
+                }
 
             }
 
@@ -455,7 +506,9 @@ public class ModelPlacementInfo
     public enum Rotation
     {
         left,
-        top
+        top,
+        bottom,
+        right
     }
 
     public PlacementType type;
